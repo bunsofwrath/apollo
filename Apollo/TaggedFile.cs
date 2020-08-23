@@ -2,12 +2,13 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 namespace Apollo
 {
     [DebuggerDisplay("{FileName}")]
-    internal class TaggedFile
+    public class TaggedFile
     {
         public byte[] MD5Hash { get; set; }
 
@@ -15,7 +16,7 @@ namespace Apollo
 
         public string TopLevelDirectory { get; set; }
 
-        private string FileName // used only for debugger display
+        public string FileName
             => Path.GetFileName(FilePath);
 
         private IEnumerable<Tag> _tags;
@@ -25,7 +26,7 @@ namespace Apollo
             set => _tags = value;
         }
 
-        public TaggedFile() // support deserialization from JSON
+        internal TaggedFile() // support deserialization from JSON
         { }
 
         public TaggedFile(string filePath, string topLevelDirectory)
@@ -52,5 +53,12 @@ namespace Apollo
 
         public TaggedFile AddTag(Tag tag)
             => new TaggedFile(FilePath, TopLevelDirectory, MD5Hash, _tags.Append(tag));
+
+        public TaggedFile ToDirectory(string directory)
+            => new TaggedFile(
+                Path.Combine(directory, FileName),
+                TopLevelDirectory,
+                MD5Hash,
+                Tags);
     }
 }

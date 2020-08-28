@@ -4,15 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Apollo.WPF"
+        xmlns:behaviors="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         mc:Ignorable="d"
+        Name="MainWindowInstance"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ListBox Margin="20" ItemsSource="{Binding Files}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <ListBox Margin="20"
+                 ItemsSource="{Binding Files}"
+                 Name="FileListBox"
+                 SelectedItem="{Binding Path=SelectedFile, Mode=TwoWay}"
+                 HorizontalContentAlignment="Stretch">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Label Content="{Binding Path=FileName}" />
+                    <Label Content="{Binding Path=FileName}"
+                           MouseDoubleClick="FileLabel_MouseDoubleClick"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBox Margin="0,20,20,20"
+                     Grid.Row="0"
+                     Name="TagTextBox"
+                     KeyDown="TextBox_KeyDown"
+                     Text="{Binding ElementName=MainWindowInstance,Path=NewTagText,UpdateSourceTrigger=PropertyChanged}"
+                     behaviors:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding TagNames}"/>
+            <ListBox Margin="0,0,20,20"
+                     Grid.Row="1"
+                     Name="TagListBox"
+                     HorizontalContentAlignment="Stretch"
+                     ItemsSource="{Binding Path=SelectedItem.Tags,ElementName=FileListBox,Mode=OneWay}"
+                     KeyDown="TagListBox_KeyDown">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Path=Name}"
+                               MouseDoubleClick="TagLabel_MouseDoubleClick"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,12 +20,7 @@ namespace Apollo
         public string FileName
             => Path.GetFileName(FilePath);
 
-        private IEnumerable<Tag> _tags;
-        public IEnumerable<Tag> Tags
-        {
-            get => _tags.ToList();
-            set => _tags = value;
-        }
+        public ObservableCollection<Tag> Tags { get; set; }
 
         internal TaggedFile() // support deserialization from JSON
         { }
@@ -40,7 +36,7 @@ namespace Apollo
             using (var stream = File.OpenRead(FilePath))
                 MD5Hash = md5.ComputeHash(stream);
 
-            _tags = new List<Tag>();
+            Tags = new ObservableCollection<Tag>();
         }
 
         private TaggedFile(string filePath, string topLevelDirectory, byte[] md5Hash, IEnumerable<Tag> tags)
@@ -48,11 +44,8 @@ namespace Apollo
             FilePath = filePath;
             TopLevelDirectory = topLevelDirectory;
             MD5Hash = md5Hash;
-            _tags = tags;
+            Tags = new ObservableCollection<Tag>(tags);
         }
-
-        public TaggedFile AddTag(Tag tag)
-            => new TaggedFile(FilePath, TopLevelDirectory, MD5Hash, _tags.Append(tag));
 
         public TaggedFile ToDirectory(string directory)
             => new TaggedFile(

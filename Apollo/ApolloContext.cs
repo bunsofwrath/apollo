@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MoreLinq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -13,6 +14,8 @@ namespace Apollo
 
         public IEnumerable<TaggedFile> Files { get; }
 
+        public ObservableCollection<Tag> Tags { get; }
+
         public ApolloContext(IConfiguration configuration)
         {
             var directories = configuration
@@ -20,7 +23,12 @@ namespace Apollo
                 .AsEnumerable()
                 .Skip(1)
                 .Select(f => f.Value);
-            Files = GetTaggedFiles(directories);
+            Files = GetTaggedFiles(directories)
+                .ToList();
+            Tags = new ObservableCollection<Tag>(
+                Files
+                .SelectMany(f => f.Tags)
+                .Distinct());
         }
 
         private IEnumerable<TaggedFile> GetTaggedFiles(IEnumerable<string> folders)
